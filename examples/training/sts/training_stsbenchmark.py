@@ -23,14 +23,19 @@ from sentence_transformers.trainer import SentenceTransformerTrainer
 from sentence_transformers.training_args import SentenceTransformerTrainingArguments
 
 # Set the log level to INFO to get more information
-logging.basicConfig(format="%(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO
+)
 
 # You can specify any Hugging Face pre-trained model here, for example, bert-base-uncased, roberta-base, xlm-roberta-base
 model_name = sys.argv[1] if len(sys.argv) > 1 else "distilbert-base-uncased"
 train_batch_size = 16
 num_epochs = 4
 output_dir = (
-    "output/training_stsbenchmark_" + model_name.replace("/", "-") + "-" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    "output/training_stsbenchmark_"
+    + model_name.replace("/", "-")
+    + "-"
+    + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 )
 
 # 1. Here we define our SentenceTransformer model. If not already a Sentence Transformer model, it will automatically
@@ -99,7 +104,7 @@ test_evaluator = EmbeddingSimilarityEvaluator(
     main_similarity=SimilarityFunction.COSINE,
     name="sts-test",
 )
-test_evaluator(model)
+test_evaluator(model, f"{output_dir}/results")
 
 # 8. Save the trained & evaluated model locally
 final_output_dir = f"{output_dir}/final"
