@@ -104,7 +104,7 @@ test_evaluator = EmbeddingSimilarityEvaluator(
     main_similarity=SimilarityFunction.COSINE,
     name="sts-test",
 )
-test_evaluator(model, f"{output_dir}/results")
+test_evaluator(model, output_dir)
 
 # 8. Save the trained & evaluated model locally
 final_output_dir = f"{output_dir}/final"
