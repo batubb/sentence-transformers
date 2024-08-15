@@ -8,7 +8,11 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
-from sklearn.metrics.pairwise import paired_cosine_distances, paired_euclidean_distances, paired_manhattan_distances
+from sklearn.metrics.pairwise import (
+    paired_cosine_distances,
+    paired_euclidean_distances,
+    paired_manhattan_distances,
+)
 
 from sentence_transformers.evaluation.SentenceEvaluator import SentenceEvaluator
 from sentence_transformers.readers import InputExample
@@ -69,7 +73,9 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         name: str = "",
         show_progress_bar: bool = False,
         write_csv: bool = True,
-        precision: Literal["float32", "int8", "uint8", "binary", "ubinary"] | None = None,
+        precision: (
+            Literal["float32", "int8", "uint8", "binary", "ubinary"] | None
+        ) = None,
         truncate_dim: int | None = None,
     ):
         """
@@ -101,13 +107,16 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         assert len(self.sentences1) == len(self.sentences2)
         assert len(self.sentences1) == len(self.scores)
 
-        self.main_similarity = SimilarityFunction(main_similarity) if main_similarity else None
+        self.main_similarity = (
+            SimilarityFunction(main_similarity) if main_similarity else None
+        )
         self.name = name
 
         self.batch_size = batch_size
         if show_progress_bar is None:
             show_progress_bar = (
-                logger.getEffectiveLevel() == logging.INFO or logger.getEffectiveLevel() == logging.DEBUG
+                logger.getEffectiveLevel() == logging.INFO
+                or logger.getEffectiveLevel() == logging.DEBUG
             )
         self.show_progress_bar = show_progress_bar
 
@@ -143,7 +152,11 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         return cls(sentences1, sentences2, scores, **kwargs)
 
     def __call__(
-        self, model: SentenceTransformer, output_path: str = None, epoch: int = -1, steps: int = -1
+        self,
+        model: SentenceTransformer,
+        output_path: str = None,
+        epoch: int = -1,
+        steps: int = -1,
     ) -> dict[str, float]:
         if epoch != -1:
             if steps == -1:
@@ -155,9 +168,15 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         if self.truncate_dim is not None:
             out_txt += f" (truncated to {self.truncate_dim})"
 
-        logger.info(f"EmbeddingSimilarityEvaluator: Evaluating the model on the {self.name} dataset{out_txt}:")
+        logger.info(
+            f"EmbeddingSimilarityEvaluator: Evaluating the model on the {self.name} dataset{out_txt}:"
+        )
 
-        with nullcontext() if self.truncate_dim is None else model.truncate_sentence_embeddings(self.truncate_dim):
+        with (
+            nullcontext()
+            if self.truncate_dim is None
+            else model.truncate_sentence_embeddings(self.truncate_dim)
+        ):
             embeddings1 = model.encode(
                 self.sentences1,
                 batch_size=self.batch_size,
@@ -187,7 +206,9 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         cosine_scores = 1 - (paired_cosine_distances(embeddings1, embeddings2))
         manhattan_distances = -paired_manhattan_distances(embeddings1, embeddings2)
         euclidean_distances = -paired_euclidean_distances(embeddings1, embeddings2)
-        dot_products = [np.dot(emb1, emb2) for emb1, emb2 in zip(embeddings1, embeddings2)]
+        dot_products = [
+            np.dot(emb1, emb2) for emb1, emb2 in zip(embeddings1, embeddings2)
+        ]
 
         eval_pearson_cosine, _ = pearsonr(labels, cosine_scores)
         eval_spearman_cosine, _ = spearmanr(labels, cosine_scores)
@@ -201,19 +222,28 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         eval_pearson_dot, _ = pearsonr(labels, dot_products)
         eval_spearman_dot, _ = spearmanr(labels, dot_products)
 
-        logger.info(f"Cosine-Similarity :\tPearson: {eval_pearson_cosine:.4f}\tSpearman: {eval_spearman_cosine:.4f}")
+        logger.info(
+            f"Cosine-Similarity :\tPearson: {eval_pearson_cosine:.4f}\tSpearman: {eval_spearman_cosine:.4f}"
+        )
         logger.info(
             f"Manhattan-Distance:\tPearson: {eval_pearson_manhattan:.4f}\tSpearman: {eval_spearman_manhattan:.4f}"
         )
         logger.info(
             f"Euclidean-Distance:\tPearson: {eval_pearson_euclidean:.4f}\tSpearman: {eval_spearman_euclidean:.4f}"
         )
-        logger.info(f"Dot-Product-Similarity:\tPearson: {eval_pearson_dot:.4f}\tSpearman: {eval_spearman_dot:.4f}")
+        logger.info(
+            f"Dot-Product-Similarity:\tPearson: {eval_pearson_dot:.4f}\tSpearman: {eval_spearman_dot:.4f}"
+        )
 
         if output_path is not None and self.write_csv:
             csv_path = os.path.join(output_path, self.csv_file)
             output_file_exists = os.path.isfile(csv_path)
-            with open(csv_path, newline="", mode="a" if output_file_exists else "w", encoding="utf-8") as f:
+            with open(
+                csv_path,
+                newline="",
+                mode="a" if output_file_exists else "w+",
+                encoding="utf-8",
+            ) as f:
                 writer = csv.writer(f)
                 if not output_file_exists:
                     writer.writerow(self.csv_headers)
@@ -248,9 +278,17 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
             "spearman_euclidean": eval_spearman_euclidean,
             "pearson_dot": eval_pearson_dot,
             "spearman_dot": eval_spearman_dot,
-            "pearson_max": max(eval_pearson_cosine, eval_pearson_manhattan, eval_pearson_euclidean, eval_pearson_dot),
+            "pearson_max": max(
+                eval_pearson_cosine,
+                eval_pearson_manhattan,
+                eval_pearson_euclidean,
+                eval_pearson_dot,
+            ),
             "spearman_max": max(
-                eval_spearman_cosine, eval_spearman_manhattan, eval_spearman_euclidean, eval_spearman_dot
+                eval_spearman_cosine,
+                eval_spearman_manhattan,
+                eval_spearman_euclidean,
+                eval_spearman_dot,
             ),
         }
         metrics = self.prefix_name_to_metrics(metrics, self.name)
