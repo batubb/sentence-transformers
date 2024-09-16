@@ -61,3 +61,8 @@ wandb
 checkpoints
 tmp
 .DS_Store
+examples/training/sts/train_bert_base_uncased_stsb.ipynb
+examples/training/sts/batu_results/similarity_evaluation_sts-dev_results.csv
+examples/training/sts/test.py
+examples/training/sts/test.ipynb
+.ipynb_checkpoints
