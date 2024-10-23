@@ -83,9 +83,7 @@ class SBert(nn.Module):
 
     def __init__(self):
         super(SBert, self).__init__()
-
         self.originalModel = AutoModel.from_pretrained("google-bert/bert-base-uncased")
-        self.tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
 
     def forward(self, input_ids, attention_mask):
         # This is N, T, D
@@ -101,6 +99,33 @@ class SBert(nn.Module):
         sentence_embeddings = sum_embeddings / non_pad_tokens
 
         return sentence_embeddings
+
+
+class SimpleBert(nn.Module):
+    def __init__(self, mode):
+        super(SimpleBert, self).__init__()
+        self.originalModel = AutoModel.from_pretrained("google-bert/bert-base-uncased")
+        assert mode == "CLS" or mode == "AVG_IGNORE_PADS" or mode == "AVG"
+        self.mode = mode
+
+    def forward(self, input_ids, attention_mask):
+        if self.mode == "CLS":
+            return self.originalModel(input_ids, attention_mask)["pooler_output"]
+        elif self.mode == "AVG_IGNORE_PADS":
+            out = self.originalModel(input_ids, attention_mask)["last_hidden_state"]
+            # pool, i.e. take the mean of the out
+            attention_mask_expanded = attention_mask.unsqueeze(-1).expand(out.size())
+            masked_embeddings = out * attention_mask_expanded
+            # Compute the sum of the token embeddings, ignoring pad tokens
+            sum_embeddings = masked_embeddings.sum(dim=1)
+            # Count the number of non-pad tokens (sum of attention mask along sequence length)
+            non_pad_tokens = attention_mask.sum(dim=1, keepdim=True)
+            # Compute the average of non-pad token embeddings
+            sentence_embeddings = sum_embeddings / non_pad_tokens
+            return sentence_embeddings
+        else:
+            out = self.originalModel(input_ids, attention_mask)["last_hidden_state"]
+            return out.mean(dim=1)
 
 
 def evaluate(model, sts_dev_data_loader, device):
@@ -170,7 +195,6 @@ def main():
         collate_fn=sts_dev_dataset.collate_fn,
         num_workers=4 if args.use_gpu else 0,  # make this 4 when GPU is available,
     )
-
     # 2. prepare the model
     model = SBert()
     model = model.to(device)
@@ -220,6 +244,33 @@ def main():
         # TODO: this ends up being 4.002 and 3.002. I think we have a one off bug here but it's not that important
         epoch_in_ref_impl = iteration_num / len(sts_train_data_loader)
         print(f"{spearman=} {iteration_num=} {epoch_in_ref_impl=}")
+
+    # Run the 'basic' bert-base-uncased model to see how that would've performed without any additional trainig we've done in SBert
+    # To do this, we need to use bert-base-uncased to get the embedding(represantation) of a sentence. Let's look at how we did this in the CS224N assignment
+    # If you look at the code in `/Users/batuhan.balci/Documents/CS224N Spring 24/CS224N-Spring2024-DFP-Student-Handout/classifier.py`, you will see that BertSentimentClassifier.forward
+    # simply uses self.bert(...)['pooler_output']. So we can do the same
+    basicModelCLS = SimpleBert("CLS")
+    basicModelCLS = basicModelCLS.to(device)
+    spearman_basic_cls, _ = evaluate(basicModelCLS, sts_dev_data_loader, device)
+    print(
+        f"spearman score with the only the untrained bert CLS token: {spearman_basic_cls=}"
+    )
+
+    basicModelAVGIgnorePads = SimpleBert("AVG_IGNORE_PADS")
+    basicModelAVGIgnorePads = basicModelAVGIgnorePads.to(device)
+    spearman_basic_avg_ignore_pads, _ = evaluate(
+        basicModelAVGIgnorePads, sts_dev_data_loader, device
+    )
+    print(
+        f"spearman score with the only the untrained bert avg of tokens ignore pads: {spearman_basic_avg_ignore_pads=}"
+    )
+
+    basicModelAVG = SimpleBert("AVG")
+    basicModelAVG = basicModelAVG.to(device)
+    spearman_basic_avg, _ = evaluate(basicModelAVG, sts_dev_data_loader, device)
+    print(
+        f"spearman score with the only the untrained bert avg of tokens: {spearman_basic_avg=}"
+    )
 
 
 if __name__ == "__main__":
