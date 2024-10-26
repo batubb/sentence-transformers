@@ -7,8 +7,21 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
+import sys
 
-from datasets import load_dataset
+# We do all these schenanegans to make sure that the statement ``from datasets import load_dataset`` works. If we don't do these
+# Python tries to use datasets defined in CS224N DFP Project, which does not have a load_dataset method and we error out.
+if "datasets" in sys.modules:
+    del sys.modules["datasets"]
+original_sys_path = sys.path.copy()
+sys.path.pop(0)
+try:
+    from datasets import load_dataset
+finally:
+    if "datasets" in sys.modules:
+        del sys.modules["datasets"]
+    sys.path = original_sys_path
+
 from transformers import AutoTokenizer, AutoModel
 from transformers.optimization import get_scheduler, SchedulerType
 
