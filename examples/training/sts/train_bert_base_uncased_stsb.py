@@ -7,7 +7,20 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
-import sys
+import sys, os
+
+sys.path.append(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "..",
+        "..",
+        "..",
+    )
+)
+from multitask_classifier import MultitaskBERT
+from types import SimpleNamespace
+
 
 # We do all these schenanegans to make sure that the statement ``from datasets import load_dataset`` works. If we don't do these
 # Python tries to use datasets defined in CS224N DFP Project, which does not have a load_dataset method and we error out.
@@ -209,7 +222,19 @@ def main():
         num_workers=4 if args.use_gpu else 0,  # make this 4 when GPU is available,
     )
     # 2. prepare the model
-    model = SBert()
+    # model = SBert()
+    config = {
+        "hidden_dropout_prob": 0.1,
+        "num_labels": 10,
+        # TODO: dont hardcode
+        "hidden_size": 768,
+        "data_dir": ".",
+        "fine_tune_mode": "full-model",
+    }
+
+    config = SimpleNamespace(**config)
+    model = MultitaskBERT(config)
+
     model = model.to(device)
     num_epochs = 4
 
@@ -258,32 +283,32 @@ def main():
         epoch_in_ref_impl = iteration_num / len(sts_train_data_loader)
         print(f"{spearman=} {iteration_num=} {epoch_in_ref_impl=}")
 
-    # Run the 'basic' bert-base-uncased model to see how that would've performed without any additional trainig we've done in SBert
-    # To do this, we need to use bert-base-uncased to get the embedding(represantation) of a sentence. Let's look at how we did this in the CS224N assignment
-    # If you look at the code in `/Users/batuhan.balci/Documents/CS224N Spring 24/CS224N-Spring2024-DFP-Student-Handout/classifier.py`, you will see that BertSentimentClassifier.forward
-    # simply uses self.bert(...)['pooler_output']. So we can do the same
-    basicModelCLS = SimpleBert("CLS")
-    basicModelCLS = basicModelCLS.to(device)
-    spearman_basic_cls, _ = evaluate(basicModelCLS, sts_dev_data_loader, device)
-    print(
-        f"spearman score with the only the untrained bert CLS token: {spearman_basic_cls=}"
-    )
+    # # Run the 'basic' bert-base-uncased model to see how that would've performed without any additional trainig we've done in SBert
+    # # To do this, we need to use bert-base-uncased to get the embedding(represantation) of a sentence. Let's look at how we did this in the CS224N assignment
+    # # If you look at the code in `/Users/batuhan.balci/Documents/CS224N Spring 24/CS224N-Spring2024-DFP-Student-Handout/classifier.py`, you will see that BertSentimentClassifier.forward
+    # # simply uses self.bert(...)['pooler_output']. So we can do the same
+    # basicModelCLS = SimpleBert("CLS")
+    # basicModelCLS = basicModelCLS.to(device)
+    # spearman_basic_cls, _ = evaluate(basicModelCLS, sts_dev_data_loader, device)
+    # print(
+    #     f"spearman score with the only the untrained bert CLS token: {spearman_basic_cls=}"
+    # )
 
-    basicModelAVGIgnorePads = SimpleBert("AVG_IGNORE_PADS")
-    basicModelAVGIgnorePads = basicModelAVGIgnorePads.to(device)
-    spearman_basic_avg_ignore_pads, _ = evaluate(
-        basicModelAVGIgnorePads, sts_dev_data_loader, device
-    )
-    print(
-        f"spearman score with the only the untrained bert avg of tokens ignore pads: {spearman_basic_avg_ignore_pads=}"
-    )
+    # basicModelAVGIgnorePads = SimpleBert("AVG_IGNORE_PADS")
+    # basicModelAVGIgnorePads = basicModelAVGIgnorePads.to(device)
+    # spearman_basic_avg_ignore_pads, _ = evaluate(
+    #     basicModelAVGIgnorePads, sts_dev_data_loader, device
+    # )
+    # print(
+    #     f"spearman score with the only the untrained bert avg of tokens ignore pads: {spearman_basic_avg_ignore_pads=}"
+    # )
 
-    basicModelAVG = SimpleBert("AVG")
-    basicModelAVG = basicModelAVG.to(device)
-    spearman_basic_avg, _ = evaluate(basicModelAVG, sts_dev_data_loader, device)
-    print(
-        f"spearman score with the only the untrained bert avg of tokens: {spearman_basic_avg=}"
-    )
+    # basicModelAVG = SimpleBert("AVG")
+    # basicModelAVG = basicModelAVG.to(device)
+    # spearman_basic_avg, _ = evaluate(basicModelAVG, sts_dev_data_loader, device)
+    # print(
+    #     f"spearman score with the only the untrained bert avg of tokens: {spearman_basic_avg=}"
+    # )
 
 
 if __name__ == "__main__":
