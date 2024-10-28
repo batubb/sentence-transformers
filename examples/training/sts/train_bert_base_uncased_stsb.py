@@ -18,9 +18,6 @@ sys.path.append(
         "..",
     )
 )
-from multitask_classifier import MultitaskBERT, createDataLoaderFromData
-from evaluation import model_eval_sts
-from types import SimpleNamespace
 
 if "datasets" in sys.modules:
     del sys.modules["datasets"]
@@ -28,6 +25,10 @@ from datasets import (
     SentencePairDataset,
     load_multitask_data,
 )
+
+from multitask_classifier import MultitaskBERT, createDataLoaderFromData
+from evaluation import model_eval_sts
+from types import SimpleNamespace
 
 
 # We do all these schenanegans to make sure that the statement ``from datasets import load_dataset`` works. If we don't do these
