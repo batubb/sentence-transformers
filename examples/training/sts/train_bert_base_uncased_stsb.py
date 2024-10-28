@@ -206,7 +206,7 @@ def main():
         "--batch_size",
         help="sst: 64, cfimdb: 8 can fit a 12GB GPU",
         type=int,
-        default=8,
+        default=16,
     )
     args = parser.parse_args()
 
@@ -232,7 +232,7 @@ def main():
     # sts_dev_dataset_subset = Subset(sts_dev_dataset, range(40))
     sts_dev_data_loader = DataLoader(
         sts_dev_dataset,
-        shuffle=True,
+        shuffle=False,
         batch_size=BATCH_SIZE,
         collate_fn=sts_dev_dataset.collate_fn,
         num_workers=4 if args.use_gpu else 0,  # make this 4 when GPU is available,
@@ -265,9 +265,19 @@ def main():
         "../../../../data/sts-dev.csv",
         split="dev",
     )
-    sts_dev_dataloader = createDataLoaderFromData(
-        sts_dev_data, args, SentencePairDataset, split="dev"
+
+    sts_dev_dataset = SentencePairDataset2(sts_dev_data)
+    sts_dev_dataloader = DataLoader(
+        sts_dev_dataset,
+        shuffle=True,
+        batch_size=BATCH_SIZE,
+        collate_fn=sts_dev_dataset.collate_fn,
+        num_workers=4 if args.use_gpu else 0,  # make this 4 when GPU is available,
     )
+
+    # sts_dev_dataloader = createDataLoaderFromData(
+    #     sts_dev_data, args, SentencePairDataset, split="dev"
+    # )
 
     spearman_from_dfp_eval_dfp_data_dfp, *_ = model_eval_sts(
         sts_dev_dataloader, model_from_dfp, device, "eval"
