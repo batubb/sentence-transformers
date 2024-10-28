@@ -136,6 +136,13 @@ class SBert(nn.Module):
 
         return sentence_embeddings
 
+    def predict_similarity(
+        self, input_ids1, attention_mask1, input_ids2, attention_mask2
+    ):
+        out1 = self(input_ids1, attention_mask1)
+        out2 = self(input_ids2, attention_mask2)
+        return F.cosine_similarity(out1, out2)
+
 
 class SimpleBert(nn.Module):
     def __init__(self, mode):
