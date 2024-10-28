@@ -273,7 +273,9 @@ def main():
         sts_dev_dataloader, model_from_dfp, device, "eval"
     )
 
-    print(f"{spearman=} {spearman_from_dfp=} {spearman_from_dfp_eval_dfp=}")
+    print(
+        f"{spearman=} {spearman_from_dfp=} {spearman_from_dfp_eval_dfp=} {spearman_from_dfp_eval_dfp_data_dfp=}"
+    )
 
     assert False
     num_epochs = 4
