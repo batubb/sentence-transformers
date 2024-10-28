@@ -222,18 +222,18 @@ def main():
         num_workers=4 if args.use_gpu else 0,  # make this 4 when GPU is available,
     )
     # 2. prepare the model
-    model = SBert()
-    # config = {
-    #     "hidden_dropout_prob": 0.1,
-    #     "num_labels": 10,
-    #     # TODO: dont hardcode
-    #     "hidden_size": 768,
-    #     "data_dir": ".",
-    #     "fine_tune_mode": "full-model",
-    # }
+    # model = SBert()
+    config = {
+        "hidden_dropout_prob": 0.1,
+        "num_labels": 10,
+        # TODO: dont hardcode
+        "hidden_size": 768,
+        "data_dir": ".",
+        "fine_tune_mode": "full-model",
+    }
 
-    # config = SimpleNamespace(**config)
-    # model = MultitaskBERT(config)
+    config = SimpleNamespace(**config)
+    model = MultitaskBERT(config)
 
     model = model.to(device)
     num_epochs = 4
