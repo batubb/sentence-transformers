@@ -25,10 +25,7 @@ from types import SimpleNamespace
 if "datasets" in sys.modules:
     del sys.modules["datasets"]
 from datasets import (
-    SentenceClassificationDataset,
-    SentenceClassificationTestDataset,
     SentencePairDataset,
-    SentencePairTestDataset,
     load_multitask_data,
 )
 
