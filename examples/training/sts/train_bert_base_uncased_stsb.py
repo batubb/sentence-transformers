@@ -287,8 +287,12 @@ def main():
         sts_dev_dataloader, model_from_dfp, device, "eval"
     )
 
+    spearman_from_model_eval_dfp_data_dfp, *_ = model_eval_sts(
+        sts_dev_dataloader, model, device, "eval"
+    )
+
     print(
-        f"{spearman=} {spearman_from_dfp=} {spearman_from_dfp_eval_dfp=} {spearman_from_dfp_eval_dfp_data_dfp=}"
+        f"{spearman=} {spearman_from_dfp=} {spearman_from_dfp_eval_dfp=} {spearman_from_dfp_eval_dfp_data_dfp=} {spearman_from_model_eval_dfp_data_dfp=}"
     )
 
     assert False
