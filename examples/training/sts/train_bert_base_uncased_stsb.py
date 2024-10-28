@@ -241,7 +241,7 @@ def main():
     spearman, _ = evaluate(model, sts_dev_data_loader, device)
     spearman_from_dfp, _ = evaluate(model_from_dfp, sts_dev_data_loader, device)
     spearman_from_dfp_eval_dfp = model_eval_sts(
-        model_from_dfp, sts_dev_data_loader, device, "eval"
+        sts_dev_data_loader, model_from_dfp, device, "eval"
     )
     print(f"{spearman=} {spearman_from_dfp=} {spearman_from_dfp_eval_dfp=}")
 
