@@ -9,14 +9,15 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 import sys, os
 
-sys.path.append(
+sys.path.insert(
+    0,
     os.path.join(
         os.path.dirname(__file__),
         "..",
         "..",
         "..",
         "..",
-    )
+    ),
 )
 
 if "datasets" in sys.modules:
