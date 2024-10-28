@@ -254,7 +254,10 @@ def main():
     )
 
     sst_dev_data, sst_dev_num_labels, para_dev_data, sts_dev_data = load_multitask_data(
-        "data/ids-sst-dev.csv", "data/quora-dev.csv", "data/sts-dev.csv", split="dev"
+        "../../../../data/ids-sst-dev.csv",
+        "../../../../data/quora-dev.csv",
+        "../../../../data/sts-dev.csv",
+        split="dev",
     )
     sts_dev_dataloader = createDataLoaderFromData(
         sts_dev_data, args, SentencePairDataset, split="dev"
