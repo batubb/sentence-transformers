@@ -47,7 +47,7 @@ from transformers import AutoTokenizer, AutoModel
 from transformers.optimization import get_scheduler, SchedulerType
 
 
-class SentencePairDataset(Dataset):
+class SentencePairDataset2(Dataset):
     def __init__(self, dataset):
         self.dataset = dataset
         self.tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
@@ -206,7 +206,7 @@ def main():
 
     # 1. prepare the training data
     sts_train_data = load_dataset("sentence-transformers/stsb", split="train")
-    sts_train_dataset = SentencePairDataset(sts_train_data)
+    sts_train_dataset = SentencePairDataset2(sts_train_data)
     # if you run on local, use a Subset
     # sts_train_dataset_subset = Subset(sts_train_dataset, range(40))
     BATCH_SIZE = 16
@@ -219,7 +219,7 @@ def main():
     )
 
     sts_dev_data = load_dataset("sentence-transformers/stsb", split="validation")
-    sts_dev_dataset = SentencePairDataset(sts_dev_data)
+    sts_dev_dataset = SentencePairDataset2(sts_dev_data)
     # if you run on local, use a Subset
     # sts_dev_dataset_subset = Subset(sts_dev_dataset, range(40))
     sts_dev_data_loader = DataLoader(
