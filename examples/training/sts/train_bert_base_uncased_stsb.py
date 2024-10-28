@@ -280,7 +280,7 @@ def main():
     # )
 
     sts_dev_dataloader = createDataLoaderFromData(
-        sts_dev_data, args, SentencePairDataset, split="dev"
+        sts_dev_data, args, SentencePairDataset, split="dev", isRegression=True
     )
 
     spearman_from_dfp_eval_dfp_data_dfp, *_ = model_eval_sts(
