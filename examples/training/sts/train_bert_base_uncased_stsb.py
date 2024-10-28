@@ -265,6 +265,10 @@ def main():
         "../../../../data/sts-dev.csv",
         split="dev",
     )
+    sts_dev_data = [
+        {"sentence1": data[0], "sentence2": data[1], "score": data[2]}
+        for data in sts_dev_data
+    ]
 
     sts_dev_dataset = SentencePairDataset2(sts_dev_data)
     sts_dev_dataloader = DataLoader(
