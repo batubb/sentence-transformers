@@ -202,6 +202,12 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--use_gpu", action="store_true")
+    parser.add_argument(
+        "--batch_size",
+        help="sst: 64, cfimdb: 8 can fit a 12GB GPU",
+        type=int,
+        default=8,
+    )
     args = parser.parse_args()
 
     device = torch.device("cuda") if args.use_gpu else torch.device("cpu")
