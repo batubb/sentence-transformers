@@ -154,7 +154,7 @@ class SimpleBert(nn.Module):
             return out.mean(dim=1)
 
 
-def evaluate(model, sts_dev_data_loader, device):
+def evaluate(model, sts_dev_data_loader, device, from_dfp=False):
     model.eval()
     with torch.no_grad():
         all_cosine_similarities = []
@@ -175,8 +175,12 @@ def evaluate(model, sts_dev_data_loader, device):
             b_labels = b_labels.to(device)
             # forward pass
             # out1 is of shape: B, D
-            out1 = model(b_ids1, b_mask1)
-            out2 = model(b_ids2, b_mask2)
+            if from_dfp:
+                out1 = model.forward_mean_tokens(b_ids1, b_mask1)
+                out2 = model.forward_mean_tokens(b_ids2, b_mask2)
+            else:
+                out1 = model(b_ids1, b_mask1)
+                out2 = model(b_ids2, b_mask2)
             # cosine_similarities is of shape: B,
             cosine_similarities = F.cosine_similarity(out1, out2)
             # numpy version:
@@ -238,7 +242,9 @@ def main():
     model_from_dfp = model_from_dfp.to(device)
 
     spearman, _ = evaluate(model, sts_dev_data_loader, device)
-    spearman_from_dfp, _ = evaluate(model_from_dfp, sts_dev_data_loader, device)
+    spearman_from_dfp, _ = evaluate(
+        model_from_dfp, sts_dev_data_loader, device, from_dfp=True
+    )
     print(f"{spearman=} {spearman_from_dfp=}")
 
     assert False
