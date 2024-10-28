@@ -18,9 +18,17 @@ sys.path.append(
         "..",
     )
 )
-from multitask_classifier import MultitaskBERT
+from multitask_classifier import MultitaskBERT, createDataLoaderFromData
 from evaluation import model_eval_sts
 from types import SimpleNamespace
+
+from datasets import (
+    SentenceClassificationDataset,
+    SentenceClassificationTestDataset,
+    SentencePairDataset,
+    SentencePairTestDataset,
+    load_multitask_data,
+)
 
 
 # We do all these schenanegans to make sure that the statement ``from datasets import load_dataset`` works. If we don't do these
@@ -240,9 +248,21 @@ def main():
 
     spearman, _ = evaluate(model, sts_dev_data_loader, device)
     spearman_from_dfp, _ = evaluate(model_from_dfp, sts_dev_data_loader, device)
-    spearman_from_dfp_eval_dfp = model_eval_sts(
+    spearman_from_dfp_eval_dfp, *_ = model_eval_sts(
         sts_dev_data_loader, model_from_dfp, device, "eval"
     )
+
+    sst_dev_data, sst_dev_num_labels, para_dev_data, sts_dev_data = load_multitask_data(
+        "data/ids-sst-dev.csv", "data/quora-dev.csv", "data/sts-dev.csv", split="dev"
+    )
+    sts_dev_dataloader = createDataLoaderFromData(
+        sts_dev_data, args, SentencePairDataset, split="dev"
+    )
+
+    spearman_from_dfp_eval_dfp_data_dfp, *_ = model_eval_sts(
+        sts_dev_dataloader, model_from_dfp, device, "eval"
+    )
+
     print(f"{spearman=} {spearman_from_dfp=} {spearman_from_dfp_eval_dfp=}")
 
     assert False
