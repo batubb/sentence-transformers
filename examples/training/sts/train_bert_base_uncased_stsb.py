@@ -265,23 +265,23 @@ def main():
         "../../../../data/sts-dev.csv",
         split="dev",
     )
-    sts_dev_data = [
-        {"sentence1": data[0], "sentence2": data[1], "score": data[2]}
-        for data in sts_dev_data
-    ]
+    # sts_dev_data = [
+    #     {"sentence1": data[0], "sentence2": data[1], "score": data[2]}
+    #     for data in sts_dev_data
+    # ]
 
-    sts_dev_dataset = SentencePairDataset2(sts_dev_data)
-    sts_dev_dataloader = DataLoader(
-        sts_dev_dataset,
-        shuffle=True,
-        batch_size=BATCH_SIZE,
-        collate_fn=sts_dev_dataset.collate_fn,
-        num_workers=4 if args.use_gpu else 0,  # make this 4 when GPU is available,
-    )
-
-    # sts_dev_dataloader = createDataLoaderFromData(
-    #     sts_dev_data, args, SentencePairDataset, split="dev"
+    # sts_dev_dataset = SentencePairDataset2(sts_dev_data)
+    # sts_dev_dataloader = DataLoader(
+    #     sts_dev_dataset,
+    #     shuffle=True,
+    #     batch_size=BATCH_SIZE,
+    #     collate_fn=sts_dev_dataset.collate_fn,
+    #     num_workers=4 if args.use_gpu else 0,  # make this 4 when GPU is available,
     # )
+
+    sts_dev_dataloader = createDataLoaderFromData(
+        sts_dev_data, args, SentencePairDataset, split="dev"
+    )
 
     spearman_from_dfp_eval_dfp_data_dfp, *_ = model_eval_sts(
         sts_dev_dataloader, model_from_dfp, device, "eval"
