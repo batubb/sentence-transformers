@@ -223,19 +223,25 @@ def main():
     )
     # 2. prepare the model
     model = SBert()
-    # config = {
-    #     "hidden_dropout_prob": 0.1,
-    #     "num_labels": 10,
-    #     # TODO: dont hardcode
-    #     "hidden_size": 768,
-    #     "data_dir": ".",
-    #     "fine_tune_mode": "full-model",
-    # }
-
-    # config = SimpleNamespace(**config)
-    # model = MultitaskBERT(config)
-
     model = model.to(device)
+
+    config = {
+        "hidden_dropout_prob": 0.1,
+        "num_labels": 10,
+        # TODO: dont hardcode
+        "hidden_size": 768,
+        "data_dir": ".",
+        "fine_tune_mode": "full-model",
+    }
+    config = SimpleNamespace(**config)
+    model_from_dfp = MultitaskBERT(config)
+    model_from_dfp = model_from_dfp.to(device)
+
+    spearman, _ = evaluate(model, sts_dev_data_loader, device)
+    spearman_from_dfp, _ = evaluate(model_from_dfp, sts_dev_data_loader, device)
+    print(f"{spearman=} {spearman_from_dfp=}")
+
+    assert False
     num_epochs = 4
 
     # This is 0.0 because that's what HuggingFace default implementation does
